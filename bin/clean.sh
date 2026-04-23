@@ -214,9 +214,72 @@ end_section() {
     stop_section_spinner
 
     if [[ "${TRACK_SECTION:-0}" == "1" && "${SECTION_ACTIVITY:-0}" == "0" ]]; then
-        echo -e "  ${GREEN}${ICON_SUCCESS}${NC} Nothing to clean"
+        echo -e "  ${GREEN}${ICON_SUCCESS}${NC} 无需清理"
     fi
     TRACK_SECTION=0
+}
+
+localize_cleanup_label() {
+    local text="$1"
+
+    case "$text" in
+        "User app cache"*) text="${text/User app cache/用户应用缓存}" ;;
+        "User app logs"*) text="${text/User app logs/用户应用日志}" ;;
+        "macOS Help system cache"*) text="${text/macOS Help system cache/macOS 帮助系统缓存}" ;;
+        "Maps geo tile cache"*) text="${text/Maps geo tile cache/地图瓦片缓存}" ;;
+        "Sandboxed app caches"*) text="${text/Sandboxed app caches/沙盒应用缓存}" ;;
+        "Group Containers logs/caches"*) text="${text/Group Containers logs\/caches/应用组日志与缓存}" ;;
+        "Chrome cache"*) text="${text/Chrome cache/Chrome 缓存}" ;;
+        "Chrome GPU cache"*) text="${text/Chrome GPU cache/Chrome GPU 缓存}" ;;
+        "Chrome component CRX cache"*) text="${text/Chrome component CRX cache/Chrome 组件 CRX 缓存}" ;;
+        "Chrome shader cache"*) text="${text/Chrome shader cache/Chrome 着色器缓存}" ;;
+        "Chrome Service Worker"*) text="${text/Chrome Service Worker/Chrome Service Worker 缓存}" ;;
+        "GoogleUpdater CRX cache"*) text="${text/GoogleUpdater CRX cache/Google 更新器 CRX 缓存}" ;;
+        "GoogleUpdater old files"*) text="${text/GoogleUpdater old files/Google 更新器旧文件}" ;;
+        "npm cache directory"*) text="${text/npm cache directory/npm 缓存目录}" ;;
+        "npm npx cache"*) text="${text/npm npx cache/npx 缓存}" ;;
+        "npm logs"*) text="${text/npm logs/npm 日志}" ;;
+        "npm prebuilds"*) text="${text/npm prebuilds/npm 预构建文件}" ;;
+        "Orphaned pnpm store"*) text="${text/Orphaned pnpm store/孤立的 pnpm 存储}" ;;
+        "uv cache"*) text="${text/uv cache/uv 缓存}" ;;
+        "PyTorch cache"*) text="${text/PyTorch cache/PyTorch 缓存}" ;;
+        "Zsh history backup"*) text="${text/Zsh history backup/Zsh 历史备份}" ;;
+        "Python bytecode cache"*) text="${text/Python bytecode cache/Python 字节码缓存}" ;;
+        "Xcode Interface Builder cache"*) text="${text/Xcode Interface Builder cache/Xcode Interface Builder 缓存}" ;;
+        "Swift package manager library cache"*) text="${text/Swift package manager library cache/Swift 包管理器库缓存}" ;;
+        "Figma cache"*) text="${text/Figma cache/Figma 缓存}" ;;
+        "Sentry crash reports"*) text="${text/Sentry crash reports/Sentry 崩溃报告}" ;;
+        "Homebrew cache"*) text="${text/Homebrew cache/Homebrew 缓存}" ;;
+        "Homebrew lock files"*) text="${text/Homebrew lock files/Homebrew 锁文件}" ;;
+        "Telegram cache"*) text="${text/Telegram cache/Telegram 缓存}" ;;
+        "ChatGPT cache"*) text="${text/ChatGPT cache/ChatGPT 缓存}" ;;
+        "Claude desktop cache"*) text="${text/Claude desktop cache/Claude 桌面端缓存}" ;;
+        "Claude logs"*) text="${text/Claude logs/Claude 日志}" ;;
+        "Codex CLI logs"*) text="${text/Codex CLI logs/Codex CLI 日志}" ;;
+        "Codex cache"*) text="${text/Codex cache/Codex 缓存}" ;;
+        "Adobe cache"*) text="${text/Adobe cache/Adobe 缓存}" ;;
+        "Adobe app caches"*) text="${text/Adobe app caches/Adobe 应用缓存}" ;;
+        "Zsh completion cache"*) text="${text/Zsh completion cache/Zsh 补全缓存}" ;;
+        "less history"*) text="${text/less history/less 历史记录}" ;;
+        "Application Support logs/caches"*) text="${text/Application Support logs\/caches/应用支持目录日志与缓存}" ;;
+        "Orphaned HTTP:"*) text="${text/Orphaned HTTP:/孤立 HTTP 残留:}" ;;
+        "Orphaned AppSupport:"*) text="${text/Orphaned AppSupport:/孤立应用支持残留:}" ;;
+    esac
+
+    text="${text// items/ 项}"
+    text="${text// item/ 项}"
+    text="${text// dirs/ 个目录}"
+    text="${text// dir/ 个目录}"
+    text="${text// caches/ 缓存}"
+    text="${text// cache/ 缓存}"
+    text="${text//缓存s/缓存}"
+    text="${text// logs/ 日志}"
+    text="${text// old files/ 旧文件}"
+    text="${text// would clean/ 将清理}"
+    text="${text// already clean/ 已经干净}"
+    text="${text// already empty/ 已经为空}"
+
+    printf '%s\n' "$text"
 }
 
 # shellcheck disable=SC2329
@@ -440,7 +503,7 @@ safe_clean() {
     if [[ ${#targets[@]} -gt 20 && -t 1 ]]; then
         show_scan_feedback=true
         stop_section_spinner
-        MOLE_SPINNER_PREFIX="  " start_inline_spinner "Scanning ${#targets[@]} items..."
+        MOLE_SPINNER_PREFIX="  " start_inline_spinner "正在扫描 ${#targets[@]} 个项目..."
     fi
 
     local -a existing_paths=()
@@ -520,7 +583,7 @@ safe_clean() {
     if [[ ${#existing_paths[@]} -gt 10 ]]; then
         show_spinner=true
         local total_paths=${#existing_paths[@]}
-        if [[ -t 1 ]]; then MOLE_SPINNER_PREFIX="  " start_inline_spinner "Scanning items..."; fi
+        if [[ -t 1 ]]; then MOLE_SPINNER_PREFIX="  " start_inline_spinner "正在扫描项目..."; fi
     fi
 
     local cleaning_spinner_started=false
@@ -542,7 +605,7 @@ safe_clean() {
         # Heuristic: mostly files -> sequential stat is faster than subshells.
         if [[ $dir_count -lt 5 && ${#existing_paths[@]} -gt 20 ]]; then
             if [[ -t 1 && "$show_spinner" == "false" ]]; then
-                MOLE_SPINNER_PREFIX="  " start_inline_spinner "Scanning items..."
+                MOLE_SPINNER_PREFIX="  " start_inline_spinner "正在扫描项目..."
                 show_spinner=true
             fi
 
@@ -618,7 +681,7 @@ safe_clean() {
         # Read results back in original order.
         # Start spinner for cleaning phase
         if [[ "$DRY_RUN" != "true" && ${#existing_paths[@]} -gt 0 && -t 1 ]]; then
-            MOLE_SPINNER_PREFIX="  " start_inline_spinner "Cleaning..."
+            MOLE_SPINNER_PREFIX="  " start_inline_spinner "正在清理..."
             cleaning_spinner_started=true
         fi
         idx=0
@@ -655,7 +718,7 @@ safe_clean() {
     else
         # Start spinner for cleaning phase (small batch)
         if [[ "$DRY_RUN" != "true" && ${#existing_paths[@]} -gt 0 && -t 1 ]]; then
-            MOLE_SPINNER_PREFIX="  " start_inline_spinner "Cleaning..."
+            MOLE_SPINNER_PREFIX="  " start_inline_spinner "正在清理..."
             cleaning_spinner_started=true
         fi
         local idx=0
@@ -710,13 +773,14 @@ safe_clean() {
         local size_human
         size_human=$(bytes_to_human "$((total_size_kb * 1024))")
 
-        local label="$description"
+        local label
+        label=$(localize_cleanup_label "$description")
         if [[ ${#targets[@]} -gt 1 ]]; then
-            label+=" ${#targets[@]} items"
+            label+=" ${#targets[@]} 项"
         fi
 
         if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "  ${YELLOW}${ICON_DRY_RUN}${NC} $label${NC}, ${YELLOW}$size_human dry${NC}"
+            echo -e "  ${YELLOW}${ICON_DRY_RUN}${NC} $label${NC}, ${YELLOW}$size_human 预览${NC}"
 
             local paths_temp
             paths_temp=$(create_temp_file)
@@ -800,38 +864,38 @@ start_cleanup() {
     fi
     printf '\n'
     if [[ -n "$EXTERNAL_VOLUME_TARGET" ]]; then
-        echo -e "${PURPLE_BOLD}Clean External Volume${NC}"
+        echo -e "${PURPLE_BOLD}清理外置磁盘${NC}"
         echo -e "${GRAY}${EXTERNAL_VOLUME_TARGET}${NC}"
         echo ""
 
         if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${YELLOW}Dry Run Mode${NC}, Preview only, no deletions"
+            echo -e "${YELLOW}预览模式${NC}，只查看将清理的内容，不会删除文件"
             echo ""
         fi
         SYSTEM_CLEAN=false
         return 0
     fi
 
-    echo -e "${PURPLE_BOLD}Clean Your Mac${NC}"
+    echo -e "${PURPLE_BOLD}清理你的 Mac${NC}"
     echo ""
 
     if [[ "$DRY_RUN" != "true" && -t 0 ]]; then
-        echo -e "${GRAY}${ICON_WARNING} Use --dry-run to preview, --whitelist to manage protected paths${NC}"
+        echo -e "${GRAY}${ICON_WARNING} 建议先用 --dry-run 预览；用 --whitelist 管理受保护路径${NC}"
     fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
-        echo -e "${YELLOW}Dry Run Mode${NC}, Preview only, no deletions"
+        echo -e "${YELLOW}预览模式${NC}，只查看将清理的内容，不会删除文件"
         echo ""
 
         ensure_user_file "$EXPORT_LIST_FILE"
         cat > "$EXPORT_LIST_FILE" << EOF
-# Mole Cleanup Preview - $(date '+%Y-%m-%d %H:%M:%S')
+# Mole 清理预览 - $(date '+%Y-%m-%d %H:%M:%S')
 #
-# How to protect files:
-# 1. Copy any path below to ~/.config/mole/whitelist
-# 2. Run: mo clean --whitelist
+# 如何保护文件不被清理:
+# 1. 把下面任意路径复制到 ~/.config/mole/whitelist
+# 2. 运行: mo clean --whitelist
 #
-# Example:
+# 示例:
 #   /Users/*/Library/Caches/com.example.app
 #
 
@@ -840,11 +904,11 @@ EOF
         # Preview system section when sudo is already cached (no password prompt).
         if has_sudo_session; then
             SYSTEM_CLEAN=true
-            echo -e "${GREEN}${ICON_SUCCESS}${NC} Admin access available, system preview included"
+            echo -e "${GREEN}${ICON_SUCCESS}${NC} 已有管理员权限，会包含系统级清理预览"
             echo ""
         else
             SYSTEM_CLEAN=false
-            echo -e "${GRAY}${ICON_WARNING} System caches need sudo, run ${NC}sudo -v && mo clean --dry-run${GRAY} for full preview${NC}"
+            echo -e "${GRAY}${ICON_WARNING} 系统缓存需要 sudo 权限；可运行 ${NC}sudo -v && mo clean --dry-run${GRAY} 查看完整预览${NC}"
             echo ""
         fi
         return
@@ -853,52 +917,52 @@ EOF
     if [[ -t 0 ]]; then
         if has_sudo_session; then
             SYSTEM_CLEAN=true
-            echo -e "${GREEN}${ICON_SUCCESS}${NC} Admin access already available"
+            echo -e "${GREEN}${ICON_SUCCESS}${NC} 已有管理员权限"
             echo ""
         else
-            echo -ne "${PURPLE}${ICON_ARROW}${NC} System caches need sudo. ${GREEN}Enter${NC} continue, ${GRAY}Space${NC} skip: "
+            echo -ne "${PURPLE}${ICON_ARROW}${NC} 系统缓存需要 sudo 权限。${GREEN}Enter${NC} 继续，${GRAY}Space${NC} 跳过: "
 
             local choice
             choice=$(read_key)
 
             # ESC/Q aborts, Space skips, Enter enables system cleanup.
             if [[ "$choice" == "QUIT" ]]; then
-                echo -e " ${GRAY}Canceled${NC}"
+                echo -e " ${GRAY}已取消${NC}"
                 exit 0
             fi
 
             if [[ "$choice" == "SPACE" ]]; then
-                echo -e " ${GRAY}Skipped${NC}"
+                echo -e " ${GRAY}已跳过${NC}"
                 echo ""
                 SYSTEM_CLEAN=false
             elif [[ "$choice" == "ENTER" ]]; then
                 printf "\r\033[K" # Clear the prompt line
-                if ensure_sudo_session "System cleanup requires admin access"; then
+                if ensure_sudo_session "系统级清理需要管理员权限"; then
                     SYSTEM_CLEAN=true
-                    echo -e "${GREEN}${ICON_SUCCESS}${NC} Admin access granted"
+                    echo -e "${GREEN}${ICON_SUCCESS}${NC} 已获得管理员权限"
                     echo ""
                 else
                     SYSTEM_CLEAN=false
                     echo ""
-                    echo -e "${YELLOW}Authentication failed${NC}, continuing with user-level cleanup"
+                    echo -e "${YELLOW}验证失败${NC}，将继续执行用户级清理"
                 fi
             else
                 SYSTEM_CLEAN=false
-                echo -e " ${GRAY}Skipped${NC}"
+                echo -e " ${GRAY}已跳过${NC}"
                 echo ""
             fi
         fi
     else
         echo ""
-        echo "Running in non-interactive mode"
+        echo "正在以非交互模式运行"
         if has_sudo_session; then
             SYSTEM_CLEAN=true
-            echo "  ${ICON_LIST} System-level cleanup enabled, sudo session active"
+            echo "  ${ICON_LIST} 已启用系统级清理，sudo 会话有效"
         else
             SYSTEM_CLEAN=false
-            echo "  ${ICON_LIST} System-level cleanup skipped, requires sudo"
+            echo "  ${ICON_LIST} 已跳过系统级清理，需要 sudo 权限"
         fi
-        echo "  ${ICON_LIST} User-level cleanup will proceed automatically"
+        echo "  ${ICON_LIST} 将自动继续用户级清理"
         echo ""
     fi
 }
@@ -915,10 +979,10 @@ perform_cleanup() {
     if [[ -z "$EXTERNAL_VOLUME_TARGET" && "${MOLE_TEST_MODE:-0}" == "1" ]]; then
         test_mode_enabled=true
         if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${YELLOW}Dry Run Mode${NC}, Preview only, no deletions"
+            echo -e "${YELLOW}预览模式${NC}，只查看将清理的内容，不会删除文件"
             echo ""
         fi
-        echo -e "${GREEN}${ICON_LIST}${NC} User app cache"
+        echo -e "${GREEN}${ICON_LIST}${NC} 用户应用缓存"
         if [[ ${#WHITELIST_PATTERNS[@]} -gt 0 ]]; then
             local -a expanded_defaults
             expanded_defaults=()
@@ -935,11 +999,11 @@ perform_cleanup() {
                 done
                 [[ "$is_default" == "false" ]] && has_custom=true && break
             done
-            [[ "$has_custom" == "true" ]] && echo -e "${GREEN}${ICON_SUCCESS}${NC} Protected items found"
+            [[ "$has_custom" == "true" ]] && echo -e "${GREEN}${ICON_SUCCESS}${NC} 已发现受保护项目"
         fi
         if [[ "$DRY_RUN" == "true" ]]; then
             echo ""
-            echo "Potential space: 0.00GB"
+            echo "预计可释放空间: 0.00GB"
         fi
         total_items=1
         files_cleaned=0
@@ -947,14 +1011,14 @@ perform_cleanup() {
     fi
 
     if [[ "$test_mode_enabled" == "false" && -z "$EXTERNAL_VOLUME_TARGET" ]]; then
-        echo -e "${BLUE}${ICON_ADMIN}${NC} $(detect_architecture) | Free space: $(get_free_space)"
+        echo -e "${BLUE}${ICON_ADMIN}${NC} $(detect_architecture) | 可用空间: $(get_free_space)"
     fi
 
     if [[ "$test_mode_enabled" == "true" ]]; then
-        local summary_heading="Test mode complete"
+        local summary_heading="测试模式完成"
         local -a summary_details
         summary_details=()
-        summary_details+=("Test mode - no actual cleanup performed")
+        summary_details+=("测试模式 - 未执行真实清理")
         print_summary_block "$summary_heading" "${summary_details[@]}"
         printf '\n'
         return 0
@@ -988,12 +1052,12 @@ perform_cleanup() {
 
         if [[ $custom_count -gt 0 || $predefined_count -gt 0 ]]; then
             local summary=""
-            [[ $predefined_count -gt 0 ]] && summary+="$predefined_count core"
+            [[ $predefined_count -gt 0 ]] && summary+="$predefined_count 条内置"
             [[ $custom_count -gt 0 && $predefined_count -gt 0 ]] && summary+=" + "
-            [[ $custom_count -gt 0 ]] && summary+="$custom_count custom"
-            summary+=" patterns active"
+            [[ $custom_count -gt 0 ]] && summary+="$custom_count 条自定义"
+            summary+=" 条规则生效"
 
-            echo -e "${BLUE}${ICON_SUCCESS}${NC} Whitelist: $summary"
+            echo -e "${BLUE}${ICON_SUCCESS}${NC} 白名单: $summary"
 
             if [[ "$DRY_RUN" == "true" ]]; then
                 for pattern in "${WHITELIST_PATTERNS[@]}"; do
@@ -1010,7 +1074,7 @@ perform_cleanup() {
         fda_status=$?
         if [[ $fda_status -eq 1 ]]; then
             echo ""
-            echo -e "${GRAY}${ICON_REVIEW}${NC} ${GRAY}Grant Full Disk Access to your terminal in System Settings for best results${NC}"
+            echo -e "${GRAY}${ICON_REVIEW}${NC} ${GRAY}建议在系统设置中给终端开启“完全磁盘访问权限”，清理结果会更完整${NC}"
         fi
     fi
 
@@ -1031,7 +1095,7 @@ perform_cleanup() {
     else
         # ===== 1. System =====
         if [[ "$SYSTEM_CLEAN" == "true" ]]; then
-            start_section "System"
+            start_section "系统"
             clean_deep_system
             clean_local_snapshots
             end_section
@@ -1040,28 +1104,28 @@ perform_cleanup() {
         if [[ ${#WHITELIST_WARNINGS[@]} -gt 0 ]]; then
             echo ""
             for warning in "${WHITELIST_WARNINGS[@]}"; do
-                echo -e "  ${GRAY}${ICON_WARNING}${NC} Whitelist: $warning"
+                echo -e "  ${GRAY}${ICON_WARNING}${NC} 白名单: $warning"
             done
         fi
 
         # ===== 2. User essentials =====
-        start_section "User essentials"
+        start_section "用户基础缓存"
         clean_user_essentials
         clean_finder_metadata
         end_section
 
         # ===== 3. App caches (merged sandboxed and standard app caches) =====
-        start_section "App caches"
+        start_section "应用缓存"
         clean_app_caches
         end_section
 
         # ===== 4. Browsers =====
-        start_section "Browsers"
+        start_section "浏览器"
         clean_browsers
         end_section
 
         # ===== 5. Cloud & Office =====
-        start_section "Cloud & Office"
+        start_section "云盘与办公软件"
         # Force shell fallback so timeout runs in this shell context.
         # The Cloud/Office cleaners rely on helpers (safe_clean, whitelist checks)
         # defined in this script and sourced modules.
@@ -1080,27 +1144,27 @@ perform_cleanup() {
         end_section
 
         # ===== 6. Developer tools (merged CLI and GUI tooling) =====
-        start_section "Developer tools"
+        start_section "开发工具"
         clean_developer_tools
         end_section
 
         # ===== 7. Applications =====
-        start_section "Applications"
+        start_section "应用程序"
         clean_user_gui_applications
         end_section
 
         # ===== 8. Virtualization =====
-        start_section "Virtualization"
+        start_section "虚拟化工具"
         clean_virtualization_tools
         end_section
 
         # ===== 9. Application Support =====
-        start_section "Application Support"
+        start_section "应用支持文件"
         clean_application_support_logs
         end_section
 
         # ===== 10. App leftovers =====
-        start_section "App leftovers"
+        start_section "应用残留"
         clean_orphaned_app_data
         clean_orphaned_system_services
         show_user_launch_agent_hint_notice
@@ -1110,28 +1174,28 @@ perform_cleanup() {
         clean_apple_silicon_caches
 
         # ===== 12. Device backups & firmware =====
-        start_section "Device backups & firmware"
+        start_section "设备备份与固件"
         clean_cached_device_firmware
         check_ios_device_backups
         end_section
 
         # ===== 13. Time Machine =====
-        start_section "Time Machine"
+        start_section "时间机器"
         clean_time_machine_failed_backups
         end_section
 
         # ===== 14. Large files =====
-        start_section "Large files"
+        start_section "大文件"
         check_large_file_candidates
         end_section
 
         # ===== 15. System Data clues =====
-        start_section "System Data clues"
+        start_section "系统数据线索"
         show_system_data_hint_notice
         end_section
 
         # ===== 16. Project artifacts =====
-        start_section "Project artifacts"
+        start_section "项目构建产物"
         show_project_artifact_hint_notice
         end_section
     fi
@@ -1142,9 +1206,9 @@ perform_cleanup() {
     local summary_heading=""
     local summary_status="success"
     if [[ "$DRY_RUN" == "true" ]]; then
-        summary_heading="Dry run complete - no changes made"
+        summary_heading="预览完成 - 未做任何修改"
     else
-        summary_heading="Cleanup complete"
+        summary_heading="清理完成"
     fi
 
     local -a summary_details=()
@@ -1154,32 +1218,32 @@ perform_cleanup() {
         freed_size_human=$(bytes_to_human_kb "$total_size_cleaned")
 
         if [[ "$DRY_RUN" == "true" ]]; then
-            local stats="Potential space: ${GREEN}${freed_size_human}${NC}"
-            [[ $files_cleaned -gt 0 ]] && stats+=" | Items: $files_cleaned"
-            [[ $total_items -gt 0 ]] && stats+=" | Categories: $total_items"
+            local stats="预计可释放空间: ${GREEN}${freed_size_human}${NC}"
+            [[ $files_cleaned -gt 0 ]] && stats+=" | 项目: $files_cleaned"
+            [[ $total_items -gt 0 ]] && stats+=" | 分类: $total_items"
             summary_details+=("$stats")
 
             {
                 echo ""
                 echo "# ============================================"
-                echo "# Summary"
+                echo "# 汇总"
                 echo "# ============================================"
-                echo "# Potential cleanup: ${freed_size_human}"
-                echo "# Items: $files_cleaned"
-                echo "# Categories: $total_items"
+                echo "# 预计可清理: ${freed_size_human}"
+                echo "# 项目: $files_cleaned"
+                echo "# 分类: $total_items"
             } >> "$EXPORT_LIST_FILE"
 
-            summary_details+=("Detailed file list: ${GRAY}$EXPORT_LIST_FILE${NC}")
-            summary_details+=("Use ${GRAY}mo clean --whitelist${NC} to add protection rules")
+            summary_details+=("详细文件列表: ${GRAY}$EXPORT_LIST_FILE${NC}")
+            summary_details+=("可使用 ${GRAY}mo clean --whitelist${NC} 添加保护规则")
         else
-            local summary_line="Space freed: ${GREEN}${freed_size_human}${NC}"
+            local summary_line="已释放空间: ${GREEN}${freed_size_human}${NC}"
 
             if [[ $files_cleaned -gt 0 && $total_items -gt 0 ]]; then
-                summary_line+=" | Items cleaned: $files_cleaned | Categories: $total_items"
+                summary_line+=" | 已清理项目: $files_cleaned | 分类: $total_items"
             elif [[ $files_cleaned -gt 0 ]]; then
-                summary_line+=" | Items cleaned: $files_cleaned"
+                summary_line+=" | 已清理项目: $files_cleaned"
             elif [[ $total_items -gt 0 ]]; then
-                summary_line+=" | Categories: $total_items"
+                summary_line+=" | 分类: $total_items"
             fi
 
             summary_details+=("$summary_line")
@@ -1191,25 +1255,25 @@ perform_cleanup() {
 
                 if [[ $movies -gt 0 ]]; then
                     if [[ $movies -eq 1 ]]; then
-                        summary_details+=("Equivalent to ~$movies 4K movie of storage.")
+                        summary_details+=("大约相当于 $movies 部 4K 电影的存储空间。")
                     else
-                        summary_details+=("Equivalent to ~$movies 4K movies of storage.")
+                        summary_details+=("大约相当于 $movies 部 4K 电影的存储空间。")
                     fi
                 fi
             fi
 
             local final_free_space
             final_free_space=$(get_free_space)
-            summary_details+=("Free space now: $final_free_space")
+            summary_details+=("当前可用空间: $final_free_space")
         fi
     else
         summary_status="info"
         if [[ "$DRY_RUN" == "true" ]]; then
-            summary_details+=("No significant reclaimable space detected, system already clean.")
+            summary_details+=("没有发现明显可回收空间，系统已经比较干净。")
         else
-            summary_details+=("System was already clean; no additional space freed.")
+            summary_details+=("系统已经比较干净，没有额外释放空间。")
         fi
-        summary_details+=("Free space now: $(get_free_space)")
+        summary_details+=("当前可用空间: $(get_free_space)")
     fi
 
     if [[ $had_errexit -eq 1 ]]; then

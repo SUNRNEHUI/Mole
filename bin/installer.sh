@@ -212,11 +212,11 @@ collect_installers() {
 
     # Start scanning with spinner
     if [[ -t 1 ]]; then
-        start_inline_spinner "Scanning for installers..."
+        start_inline_spinner "正在扫描安装包..."
     fi
 
     # Start debug session
-    debug_operation_start "Collect Installers" "Scanning for redundant installer files"
+    debug_operation_start "收集安装包" "正在扫描可清理的安装包文件"
 
     # Scan all paths, deduplicate, and sort results
     local -a all_files=()
@@ -224,7 +224,7 @@ collect_installers() {
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
         all_files+=("$file")
-        debug_file_action "Found installer" "$file"
+        debug_file_action "发现安装包" "$file"
     done < <(scan_all_installers | sort -u)
 
     if [[ -t 1 ]]; then
@@ -233,14 +233,14 @@ collect_installers() {
 
     if [[ ${#all_files[@]} -eq 0 ]]; then
         if [[ "${IN_ALT_SCREEN:-0}" != "1" ]]; then
-            echo -e "${GREEN}${ICON_SUCCESS}${NC} Great! No installer files to clean"
+            echo -e "${GREEN}${ICON_SUCCESS}${NC} 很好，没有需要清理的安装包"
         fi
         return 1
     fi
 
     # Calculate sizes with spinner
     if [[ -t 1 ]]; then
-        start_inline_spinner "Calculating sizes..."
+        start_inline_spinner "正在计算大小..."
     fi
 
     # Process each installer
@@ -397,7 +397,7 @@ select_installers() {
             scroll_indicator=" ${GRAY}[${current_pos}/${total_items}]${NC}"
         fi
 
-        printf "${PURPLE_BOLD}Select Installers to Remove${NC}%s ${GRAY}, ${selected_human}, ${selected_count} selected${NC}\n" "$scroll_indicator"
+        printf "${PURPLE_BOLD}选择要删除的安装包${NC}%s ${GRAY}, ${selected_human}, 已选择 ${selected_count} 个${NC}\n" "$scroll_indicator"
         printf "%s\n" "$clear_line"
 
         # Calculate visible range
@@ -422,7 +422,7 @@ select_installers() {
         done
 
         printf "%s\n" "$clear_line"
-        printf "%s${GRAY}${ICON_NAV_UP}${ICON_NAV_DOWN}  |  Space Select  |  Enter Confirm  |  A All  |  I Invert  |  Q Quit${NC}\n" "$clear_line"
+        printf "%s${GRAY}${ICON_NAV_UP}${ICON_NAV_DOWN}  |  Space 选择  |  Enter 确认  |  A 全选  |  I 反选  |  Q 退出${NC}\n" "$clear_line"
     }
 
     trap restore_terminal EXIT
@@ -549,7 +549,7 @@ delete_selected_installers() {
     confirm_human=$(bytes_to_human "$confirm_size")
 
     # Show files to be deleted
-    echo -e "${PURPLE_BOLD}Files to be removed:${NC}"
+    echo -e "${PURPLE_BOLD}将删除的文件:${NC}"
     for idx in "${selected_indices[@]}"; do
         if [[ "$idx" =~ ^[0-9]+$ ]] && [[ $idx -lt ${#INSTALLER_PATHS[@]} ]]; then
             local file_path="${INSTALLER_PATHS[$idx]}"
@@ -562,7 +562,7 @@ delete_selected_installers() {
 
     # Confirm deletion
     echo ""
-    echo -ne "${PURPLE}${ICON_ARROW}${NC} Delete ${#selected_indices[@]} installers, ${confirm_human}  ${GREEN}Enter${NC} confirm, ${GRAY}ESC${NC} cancel: "
+    echo -ne "${PURPLE}${ICON_ARROW}${NC} 删除 ${#selected_indices[@]} 个安装包，共 ${confirm_human}  ${GREEN}Enter${NC} 确认，${GRAY}ESC${NC} 取消: "
 
     IFS= read -r -s -n1 confirm || confirm=""
     case "$confirm" in
@@ -583,7 +583,7 @@ delete_selected_installers() {
     total_size_freed_kb=0
 
     if [[ -t 1 ]]; then
-        start_inline_spinner "Removing installers..."
+        start_inline_spinner "正在删除安装包..."
     fi
 
     for idx in "${selected_indices[@]}"; do
@@ -629,7 +629,7 @@ perform_installers() {
             IN_ALT_SCREEN=0
         fi
         printf '\n'
-        echo -e "${GREEN}${ICON_SUCCESS}${NC} Great! No installer files to clean"
+        echo -e "${GREEN}${ICON_SUCCESS}${NC} 很好，没有需要清理的安装包"
         printf '\n'
         return 2 # Nothing to clean
     fi
@@ -658,12 +658,12 @@ perform_installers() {
 }
 
 show_summary() {
-    local summary_heading="Installers cleaned"
+    local summary_heading="安装包清理完成"
     local -a summary_details=()
     local dry_run_mode="${MOLE_DRY_RUN:-0}"
 
     if [[ "$dry_run_mode" == "1" ]]; then
-        summary_heading="Dry run complete - no changes made"
+        summary_heading="预览完成 - 未做任何修改"
     fi
 
     if [[ $total_deleted -gt 0 ]]; then
@@ -671,13 +671,13 @@ show_summary() {
         freed_mb=$(echo "$total_size_freed_kb" | awk '{printf "%.2f", $1/1024}')
 
         if [[ "$dry_run_mode" == "1" ]]; then
-            summary_details+=("Would remove ${GREEN}$total_deleted${NC} installers, free ${GREEN}${freed_mb}MB${NC}")
+            summary_details+=("预计删除 ${GREEN}$total_deleted${NC} 个安装包，释放 ${GREEN}${freed_mb}MB${NC}")
         else
-            summary_details+=("Removed ${GREEN}$total_deleted${NC} installers, freed ${GREEN}${freed_mb}MB${NC}")
-            summary_details+=("Your Mac is cleaner now!")
+            summary_details+=("已删除 ${GREEN}$total_deleted${NC} 个安装包，释放 ${GREEN}${freed_mb}MB${NC}")
+            summary_details+=("你的 Mac 更干净了。")
         fi
     else
-        summary_details+=("No installers were removed")
+        summary_details+=("没有删除任何安装包")
     fi
 
     print_summary_block "$summary_heading" "${summary_details[@]}"
@@ -698,14 +698,14 @@ main() {
                 export MOLE_DRY_RUN=1
                 ;;
             *)
-                echo "Unknown option: $arg"
+                echo "未知选项: $arg"
                 exit 1
                 ;;
         esac
     done
 
     if [[ "${MOLE_DRY_RUN:-0}" == "1" ]]; then
-        echo -e "${YELLOW}${ICON_DRY_RUN} DRY RUN MODE${NC}, No installer files will be removed"
+        echo -e "${YELLOW}${ICON_DRY_RUN} 预览模式${NC}，不会删除任何安装包文件"
         printf '\n'
     fi
 

@@ -3,6 +3,8 @@
   <p><em>Deep clean and optimize your Mac.</em></p>
 </div>
 
+> 中文本地化说明：此仓库是 [tw93/Mole](https://github.com/tw93/Mole) 的中文本地化 fork，主要汉化 CLI 菜单、帮助信息和部分交互提示。原项目版权归原作者 tw93 及贡献者所有，并继续遵循 MIT License。本 fork 不是 Mole 官方版本，也不代表原作者立场；如需官方版本，请访问 [tw93/Mole](https://github.com/tw93/Mole)。
+
 <p align="center">
   <a href="https://github.com/tw93/mole/stargazers"><img src="https://img.shields.io/github/stars/tw93/mole?style=flat-square" alt="Stars"></a>
   <a href="https://github.com/tw93/mole/releases"><img src="https://img.shields.io/github/v/tag/tw93/mole?label=version&style=flat-square" alt="Version"></a>

@@ -148,7 +148,7 @@ perform_purge() {
     # Show scanning with spinner below the title line
     if [[ -t 1 ]]; then
         # Print title ONCE with newline; spinner occupies the line below
-        printf '%s\n' "${PURPLE_BOLD}Purge Project Artifacts${NC}"
+        printf '%s\n' "${PURPLE_BOLD}清理项目构建产物${NC}"
 
         # Capture terminal width in parent (most reliable before forking)
         local _parent_cols=80
@@ -189,11 +189,11 @@ perform_purge() {
 
                 # Write directly to /dev/tty: \033[2K clears entire current line, \r goes to start
                 if [[ -n "$last_path" ]]; then
-                    printf '\r\033[2K%s %sScanning %s%s' \
+                    printf '\r\033[2K%s %s正在扫描 %s%s' \
                         "${BLUE}${spin_char}${NC}" \
                         "${GRAY}" "$last_path" "${NC}" > /dev/tty 2> /dev/null
                 else
-                    printf '\r\033[2K%s %sScanning...%s' \
+                    printf '\r\033[2K%s %s正在扫描...%s' \
                         "${BLUE}${spin_char}${NC}" \
                         "${GRAY}" "${NC}" > /dev/tty 2> /dev/null
                 fi
@@ -205,7 +205,7 @@ perform_purge() {
         ) &
         monitor_pid=$!
     else
-        echo -e "${PURPLE_BOLD}Purge Project Artifacts${NC}"
+        echo -e "${PURPLE_BOLD}清理项目构建产物${NC}"
     fi
 
     clean_project_artifacts
@@ -226,7 +226,7 @@ perform_purge() {
     # Final summary (matching clean.sh format)
     echo ""
 
-    local summary_heading="Purge complete"
+    local summary_heading="项目构建产物清理完成"
     local -a summary_details=()
     local total_size_cleaned=0
     local total_items_cleaned=0
@@ -242,23 +242,23 @@ perform_purge() {
     fi
 
     if [[ "${MOLE_DRY_RUN:-0}" == "1" ]]; then
-        summary_heading="Dry run complete - no changes made"
+        summary_heading="预览完成 - 未做任何修改"
     fi
 
     if [[ $total_size_cleaned -gt 0 ]]; then
         local freed_size_human
         freed_size_human=$(bytes_to_human_kb "$total_size_cleaned")
 
-        local summary_line="Space freed: ${GREEN}${freed_size_human}${NC}"
+        local summary_line="已释放空间: ${GREEN}${freed_size_human}${NC}"
         if [[ "${MOLE_DRY_RUN:-0}" == "1" ]]; then
-            summary_line="Would free: ${GREEN}${freed_size_human}${NC}"
+            summary_line="预计可释放: ${GREEN}${freed_size_human}${NC}"
         fi
-        [[ $total_items_cleaned -gt 0 ]] && summary_line+=" | Items: $total_items_cleaned"
-        summary_line+=" | Free: $(get_free_space)"
+        [[ $total_items_cleaned -gt 0 ]] && summary_line+=" | 项目: $total_items_cleaned"
+        summary_line+=" | 当前可用: $(get_free_space)"
         summary_details+=("$summary_line")
     else
-        summary_details+=("No old project artifacts to clean.")
-        summary_details+=("Free space: $(get_free_space)")
+        summary_details+=("没有需要清理的旧项目构建产物。")
+        summary_details+=("当前可用空间: $(get_free_space)")
     fi
 
     # Log session end
@@ -270,17 +270,17 @@ perform_purge() {
 
 # Show help message
 show_help() {
-    echo -e "${PURPLE_BOLD}Mole Purge${NC}, Clean old project build artifacts"
+    echo -e "${PURPLE_BOLD}Mole 项目清理${NC}，清理旧项目构建产物"
     echo ""
-    echo -e "${YELLOW}Usage:${NC} mo purge [options]"
+    echo -e "${YELLOW}用法:${NC} mo purge [选项]"
     echo ""
-    echo -e "${YELLOW}Options:${NC}"
-    echo "  --paths         Edit custom scan directories"
-    echo "  --dry-run       Preview purge actions without making changes"
-    echo "  --debug         Enable debug logging"
-    echo "  --help          Show this help message"
+    echo -e "${YELLOW}选项:${NC}"
+    echo "  --paths         编辑自定义扫描目录"
+    echo "  --dry-run       仅预览将清理的内容，不做任何修改"
+    echo "  --debug         启用调试日志"
+    echo "  --help          显示此帮助信息"
     echo ""
-    echo -e "${YELLOW}Default Paths:${NC}"
+    echo -e "${YELLOW}默认扫描路径:${NC}"
     for path in "${DEFAULT_PURGE_SEARCH_PATHS[@]}"; do
         echo "  * $path"
     done
@@ -310,8 +310,8 @@ main() {
                 export MOLE_DRY_RUN=1
                 ;;
             *)
-                echo "Unknown option: $arg"
-                echo "Use 'mo purge --help' for usage information"
+                echo "未知选项: $arg"
+                echo "使用 'mo purge --help' 查看用法"
                 exit 1
                 ;;
         esac
@@ -319,7 +319,7 @@ main() {
 
     start_purge
     if [[ "${MOLE_DRY_RUN:-0}" == "1" ]]; then
-        echo -e "${YELLOW}${ICON_DRY_RUN} DRY RUN MODE${NC}, No project artifacts will be removed"
+        echo -e "${YELLOW}${ICON_DRY_RUN} 预览模式${NC}，不会删除任何项目构建产物"
         printf '\n'
     fi
     hide_cursor

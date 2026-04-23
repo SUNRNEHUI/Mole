@@ -26,7 +26,7 @@ source "$SCRIPT_DIR/lib/manage/whitelist.sh"
 
 print_header() {
     printf '\n'
-    echo -e "${PURPLE_BOLD}Optimize and Check${NC}"
+    echo -e "${PURPLE_BOLD}优化与检查${NC}"
 }
 
 # Bash-native JSON parsing helpers (no jq dependency).
@@ -134,11 +134,11 @@ show_optimization_summary() {
     local total_applied=$safe_count
 
     if [[ "${MOLE_DRY_RUN:-0}" == "1" ]]; then
-        summary_title="Dry Run Complete, No Changes Made"
-        summary_details+=("Would apply ${YELLOW}${total_applied:-0}${NC} optimizations")
-        summary_details+=("Run without ${YELLOW}--dry-run${NC} to apply these changes")
+        summary_title="预览完成 - 未做任何修改"
+        summary_details+=("预计应用 ${YELLOW}${total_applied:-0}${NC} 项优化")
+        summary_details+=("去掉 ${YELLOW}--dry-run${NC} 后运行即可应用这些修改")
     else
-        summary_title="Optimization and Check Complete"
+        summary_title="优化与检查完成"
 
         # Build statistics summary
         local -a stats=()
@@ -148,32 +148,32 @@ show_optimization_summary() {
 
         if [[ "$cache_kb" =~ ^[0-9]+$ ]] && [[ "$cache_kb" -gt 0 ]]; then
             local cache_human=$(bytes_to_human "$((cache_kb * 1024))")
-            stats+=("${cache_human} cache cleaned")
+            stats+=("已清理 ${cache_human} 缓存")
         fi
 
         if [[ "$db_count" =~ ^[0-9]+$ ]] && [[ "$db_count" -gt 0 ]]; then
-            stats+=("${db_count} databases optimized")
+            stats+=("已优化 ${db_count} 个数据库")
         fi
 
         if [[ "$config_count" =~ ^[0-9]+$ ]] && [[ "$config_count" -gt 0 ]]; then
-            stats+=("${config_count} configs repaired")
+            stats+=("已修复 ${config_count} 项配置")
         fi
 
         # Build first summary line with most important stat only
         local key_stat=""
         if [[ "$cache_kb" =~ ^[0-9]+$ ]] && [[ "$cache_kb" -gt 0 ]]; then
             local cache_human=$(bytes_to_human "$((cache_kb * 1024))")
-            key_stat="${cache_human} cache cleaned"
+            key_stat="已清理 ${cache_human} 缓存"
         elif [[ "$db_count" =~ ^[0-9]+$ ]] && [[ "$db_count" -gt 0 ]]; then
-            key_stat="${db_count} databases optimized"
+            key_stat="已优化 ${db_count} 个数据库"
         elif [[ "$config_count" =~ ^[0-9]+$ ]] && [[ "$config_count" -gt 0 ]]; then
-            key_stat="${config_count} configs repaired"
+            key_stat="已修复 ${config_count} 项配置"
         fi
 
         if [[ -n "$key_stat" ]]; then
-            summary_details+=("Applied ${GREEN}${total_applied:-0}${NC} optimizations, ${key_stat}")
+            summary_details+=("已应用 ${GREEN}${total_applied:-0}${NC} 项优化，${key_stat}")
         else
-            summary_details+=("Applied ${GREEN}${total_applied:-0}${NC} optimizations, all services tuned")
+            summary_details+=("已应用 ${GREEN}${total_applied:-0}${NC} 项优化，所有服务已调整")
         fi
 
         local summary_line3=""
@@ -186,7 +186,7 @@ show_optimization_summary() {
             fi
             summary_details+=("$summary_line3")
         fi
-        summary_details+=("System fully optimized")
+        summary_details+=("系统已完成优化")
     fi
 
     print_summary_block "$summary_title" "${summary_details[@]}"

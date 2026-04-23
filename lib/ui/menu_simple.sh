@@ -58,7 +58,7 @@ paginated_multi_select() {
 
     # Validation
     if [[ ${#items[@]} -eq 0 ]]; then
-        echo "No items provided" >&2
+        echo "没有可选择的项目" >&2
         return 1
     fi
 
@@ -163,12 +163,12 @@ paginated_multi_select() {
         done
 
         # Header
-        printf "${clear_line}${PURPLE_BOLD}%s${NC}  ${GRAY}%d/%d selected${NC}\n" "${title}" "$selected_count" "$total_items" >&2
+        printf "${clear_line}${PURPLE_BOLD}%s${NC}  ${GRAY}已选择 %d/%d${NC}\n" "${title}" "$selected_count" "$total_items" >&2
 
         if [[ $total_items -eq 0 ]]; then
-            printf "${clear_line}${GRAY}No items available${NC}\n" >&2
+            printf "${clear_line}${GRAY}没有可用项目${NC}\n" >&2
             printf "${clear_line}\n" >&2
-            printf "${clear_line}${GRAY}Q${NC} Quit\n" >&2
+            printf "${clear_line}${GRAY}Q${NC} 退出\n" >&2
             printf "${clear_line}" >&2
             return
         fi
@@ -212,7 +212,7 @@ paginated_multi_select() {
 
         # Clear any remaining lines at bottom
         printf "${clear_line}\n" >&2
-        printf "${clear_line}${GRAY}${ICON_NAV_UP}${ICON_NAV_DOWN} | Space | Enter | Q Exit${NC}\n" >&2
+        printf "${clear_line}${GRAY}${ICON_NAV_UP}${ICON_NAV_DOWN} | Space 选择 | Enter 确认 | Q 退出${NC}\n" >&2
 
         # Clear one more line to ensure no artifacts
         printf "${clear_line}" >&2

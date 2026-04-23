@@ -752,7 +752,7 @@ select_purge_categories() {
             scroll_indicator=" ${GRAY}[${current_pos}/${total_items}]${NC}"
         fi
 
-        printf "%s${PURPLE_BOLD}Select Categories to Clean${NC}%s${GRAY}, ${selected_size_human}, ${selected_count} selected${NC}\n" "$clear_line" "$scroll_indicator"
+        printf "%s${PURPLE_BOLD}选择要清理的分类${NC}%s${GRAY}, ${selected_size_human}, 已选择 ${selected_count} 个${NC}\n" "$clear_line" "$scroll_indicator"
         printf "%s\n" "$clear_line"
 
         IFS=',' read -r -a recent_flags <<< "${PURGE_RECENT_CATEGORIES:-}"
@@ -786,7 +786,7 @@ select_purge_categories() {
             current_full_path="${PURGE_CATEGORY_FULL_PATHS_ARRAY[current_index]}"
         fi
         if [[ -n "$current_full_path" ]]; then
-            printf "%s${GRAY}Full path:${NC} %s\n" "$clear_line" "$current_full_path"
+            printf "%s${GRAY}完整路径:${NC} %s\n" "$clear_line" "$current_full_path"
             printf "%s\n" "$clear_line"
         fi
 
@@ -797,11 +797,11 @@ select_purge_categories() {
 
         local _sep=" ${GRAY}|${NC} "
         local _nav="${GRAY}${ICON_NAV_UP}${ICON_NAV_DOWN}${NC}"
-        local _space="${GRAY}Space Select${NC}"
-        local _enter="${GRAY}Enter Confirm${NC}"
-        local _all="${GRAY}A All${NC}"
-        local _invert="${GRAY}I Invert${NC}"
-        local _quit="${GRAY}Q Quit${NC}"
+        local _space="${GRAY}Space 选择${NC}"
+        local _enter="${GRAY}Enter 确认${NC}"
+        local _all="${GRAY}A 全选${NC}"
+        local _invert="${GRAY}I 反选${NC}"
+        local _quit="${GRAY}Q 退出${NC}"
 
         # Strip ANSI to measure real length
         _ph_len() { printf "%s" "$1" | LC_ALL=C awk '{gsub(/\033\[[0-9;]*[A-Za-z]/,""); printf "%d", length}'; }
@@ -937,29 +937,26 @@ confirm_purge_cleanup() {
     [[ "$total_size_kb" =~ ^[0-9]+$ ]] || total_size_kb=0
     [[ "$unknown_count" =~ ^[0-9]+$ ]] || unknown_count=0
 
-    local item_text="artifact"
-    [[ $item_count -ne 1 ]] && item_text="artifacts"
+    local item_text="个构建产物"
 
     local size_display
     size_display=$(bytes_to_human "$((total_size_kb * 1024))")
 
     local unknown_hint=""
     if [[ $unknown_count -gt 0 ]]; then
-        local unknown_text="unknown size"
-        [[ $unknown_count -gt 1 ]] && unknown_text="unknown sizes"
-        unknown_hint=", ${unknown_count} ${unknown_text}"
+        unknown_hint=", ${unknown_count} 个大小未知"
     fi
 
     if [[ ${#selected_paths[@]} -gt 0 ]]; then
         echo ""
-        echo -e "${GRAY}Selected paths:${NC}"
+        echo -e "${GRAY}已选择路径:${NC}"
         local selected_path=""
         for selected_path in "${selected_paths[@]}"; do
             echo "  $selected_path"
         done
     fi
 
-    echo -ne "${PURPLE}${ICON_ARROW}${NC} Remove ${item_count} ${item_text}, ${size_display}${unknown_hint}  ${GREEN}Enter${NC} confirm, ${GRAY}ESC${NC} cancel: "
+    echo -ne "${PURPLE}${ICON_ARROW}${NC} 删除 ${item_count} ${item_text}, ${size_display}${unknown_hint}  ${GREEN}Enter${NC} 确认，${GRAY}ESC${NC} 取消: "
     drain_pending_input
     local key=""
     IFS= read -r -s -n1 key || key=""
@@ -1590,7 +1587,7 @@ clean_project_artifacts() {
     fi
     if [[ -z "$PURGE_SELECTION_RESULT" ]]; then
         echo ""
-        echo -e "${GRAY}No items selected${NC}"
+        echo -e "${GRAY}没有选择任何项目${NC}"
         printf '\n'
         PURGE_CATEGORY_FULL_PATHS_ARRAY=()
         unset PURGE_CATEGORY_SIZES PURGE_RECENT_CATEGORIES PURGE_AGE_LABELS PURGE_SELECTION_RESULT

@@ -14,7 +14,7 @@ trap cleanup_temp_files EXIT INT TERM
 
 # Version and update helpers
 VERSION="1.35.0"
-MOLE_TAGLINE="Deep clean and optimize your Mac."
+MOLE_TAGLINE="深度清理并优化你的 Mac。"
 
 is_touchid_configured() {
     grep -q "pam_tid.so" /etc/pam.d/sudo /etc/pam.d/sudo_local 2> /dev/null
@@ -176,12 +176,12 @@ check_for_updates() {
                         local brew_latest
                         brew_latest=$(get_homebrew_latest_version || true)
                         if [[ -n "$brew_latest" && "$brew_latest" != "$VERSION" && "$(printf '%s\n' "$VERSION" "$brew_latest" | sort -V | head -1)" == "$VERSION" ]]; then
-                            printf "\nUpdate %s available, run %smo update%s\n\n" "$brew_latest" "$GREEN" "$NC" > "$msg_cache"
+                            printf "\n发现新版本 %s，可运行 %smo update%s 更新\n\n" "$brew_latest" "$GREEN" "$NC" > "$msg_cache"
                         else
                             echo -n > "$msg_cache"
                         fi
                     else
-                        printf "\nUpdate %s available, run %smo update%s\n\n" "$latest" "$GREEN" "$NC" > "$msg_cache"
+                        printf "\n发现新版本 %s，可运行 %smo update%s 更新\n\n" "$latest" "$GREEN" "$NC" > "$msg_cache"
                     fi
                 else
                     echo -n > "$msg_cache"
@@ -244,30 +244,30 @@ show_version() {
     local channel
     channel=$(get_install_channel)
 
-    printf '\nMole version %s\n' "$VERSION"
+    printf '\nMole 版本: %s\n' "$VERSION"
     if [[ "$channel" == "nightly" ]]; then
         local commit
         commit=$(get_install_commit)
         if [[ -n "$commit" ]]; then
-            printf 'Channel: Nightly (%s)\n' "$commit"
+            printf '频道: Nightly (%s)\n' "$commit"
         else
-            printf 'Channel: Nightly\n'
+            printf '频道: Nightly\n'
         fi
     fi
     printf 'macOS: %s\n' "$os_ver"
-    printf 'Architecture: %s\n' "$arch"
-    printf 'Kernel: %s\n' "$kernel"
+    printf '架构: %s\n' "$arch"
+    printf '内核: %s\n' "$kernel"
     printf 'SIP: %s\n' "$sip_status"
-    printf 'Disk Free: %s\n' "$disk_free"
-    printf 'Install: %s\n' "$install_method"
+    printf '可用磁盘空间: %s\n' "$disk_free"
+    printf '安装方式: %s\n' "$install_method"
     printf 'Shell: %s\n\n' "${SHELL:-Unknown}"
 }
 
 show_help() {
     show_brand_banner
     echo
-    printf "%s%s%s\n" "$BLUE" "COMMANDS" "$NC"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo" "$NC" "Main menu"
+    printf "%s%s%s\n" "$BLUE" "命令" "$NC"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo" "$NC" "主菜单"
     for entry in "${MOLE_COMMANDS[@]}"; do
         local name="${entry%%:*}"
         local desc="${entry#*:}"
@@ -277,24 +277,24 @@ show_help() {
         printf "  %s%-28s%s %s\n" "$GREEN" "$display" "$NC" "$desc"
     done
     echo
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo clean --dry-run" "$NC" "Preview cleanup"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo clean --whitelist" "$NC" "Manage protected caches"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo clean --dry-run" "$NC" "预览清理内容，不删除"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo clean --whitelist" "$NC" "管理受保护缓存"
 
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo optimize --dry-run" "$NC" "Preview optimization"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo optimize --whitelist" "$NC" "Manage protected items"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo uninstall --dry-run" "$NC" "Preview app uninstall"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo purge --dry-run" "$NC" "Preview project purge"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo installer --dry-run" "$NC" "Preview installer cleanup"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo touchid enable --dry-run" "$NC" "Preview Touch ID setup"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo completion --dry-run" "$NC" "Preview shell completion edits"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo purge --paths" "$NC" "Configure scan directories"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo analyze /Volumes" "$NC" "Analyze external drives only"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo update --force" "$NC" "Force reinstall latest stable version"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo update --nightly" "$NC" "Install latest unreleased main branch build"
-    printf "  %s%-28s%s %s\n" "$GREEN" "mo remove --dry-run" "$NC" "Preview Mole removal"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo optimize --dry-run" "$NC" "预览优化操作，不修改"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo optimize --whitelist" "$NC" "管理受保护项目"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo uninstall --dry-run" "$NC" "预览应用卸载"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo purge --dry-run" "$NC" "预览项目构建产物清理"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo installer --dry-run" "$NC" "预览安装包清理"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo touchid enable --dry-run" "$NC" "预览 Touch ID 配置"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo completion --dry-run" "$NC" "预览 shell 补全配置修改"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo purge --paths" "$NC" "配置项目扫描目录"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo analyze /Volumes" "$NC" "只分析外置磁盘"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo update --force" "$NC" "强制重装最新稳定版"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo update --nightly" "$NC" "安装 main 分支夜间版"
+    printf "  %s%-28s%s %s\n" "$GREEN" "mo remove --dry-run" "$NC" "预览移除 Mole"
     echo
-    printf "%s%s%s\n" "$BLUE" "OPTIONS" "$NC"
-    printf "  %s%-28s%s %s\n" "$GREEN" "--debug" "$NC" "Show detailed operation logs"
+    printf "%s%s%s\n" "$BLUE" "选项" "$NC"
+    printf "  %s%-28s%s %s\n" "$GREEN" "--debug" "$NC" "显示更详细的操作日志"
     echo
 }
 
@@ -779,21 +779,21 @@ show_main_menu() {
 
     printf '\r\033[2K\n'
 
-    printf '\r\033[2K%s\n' "$(show_menu_option 1 "Clean        Free up disk space" "$([[ $selected -eq 1 ]] && echo true || echo false)")"
-    printf '\r\033[2K%s\n' "$(show_menu_option 2 "Uninstall    Remove apps completely" "$([[ $selected -eq 2 ]] && echo true || echo false)")"
-    printf '\r\033[2K%s\n' "$(show_menu_option 3 "Optimize     Check and maintain system" "$([[ $selected -eq 3 ]] && echo true || echo false)")"
-    printf '\r\033[2K%s\n' "$(show_menu_option 4 "Analyze      Explore disk usage" "$([[ $selected -eq 4 ]] && echo true || echo false)")"
-    printf '\r\033[2K%s\n' "$(show_menu_option 5 "Status       Monitor system health" "$([[ $selected -eq 5 ]] && echo true || echo false)")"
+    printf '\r\033[2K%s\n' "$(show_menu_option 1 "清理       清理缓存、日志和临时文件" "$([[ $selected -eq 1 ]] && echo true || echo false)")"
+    printf '\r\033[2K%s\n' "$(show_menu_option 2 "卸载       卸载应用并清理残留" "$([[ $selected -eq 2 ]] && echo true || echo false)")"
+    printf '\r\033[2K%s\n' "$(show_menu_option 3 "优化       检查并维护系统健康" "$([[ $selected -eq 3 ]] && echo true || echo false)")"
+    printf '\r\033[2K%s\n' "$(show_menu_option 4 "分析       分析磁盘占用" "$([[ $selected -eq 4 ]] && echo true || echo false)")"
+    printf '\r\033[2K%s\n' "$(show_menu_option 5 "状态       查看系统健康状态" "$([[ $selected -eq 5 ]] && echo true || echo false)")"
 
     if [[ -t 0 ]]; then
         printf '\r\033[2K\n'
-        local controls="${GRAY}↑↓  |  Enter  |  M More  |  V Version"
+        local controls="${GRAY}↑↓  |  Enter 确认  |  M 更多  |  V 版本"
         if ! is_touchid_configured; then
             controls="${controls}  |  T TouchID"
         elif [[ "${MAIN_MENU_SHOW_UPDATE:-false}" == "true" ]]; then
-            controls="${controls}  |  U Update"
+            controls="${controls}  |  U 更新"
         fi
-        controls="${controls}  |  Q Quit${NC}"
+        controls="${controls}  |  Q 退出${NC}"
         printf '\r\033[2K%s\n' "$controls"
         printf '\r\033[2K\n'
     fi
